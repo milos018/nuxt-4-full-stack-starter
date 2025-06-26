@@ -1,0 +1,65 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Database Schema Conventions
+
+## Schema Organization
+Database schemas are organized in the following structure:
+
+```
+server/utils/
+├── db.schema.ts             # Main schema file
+├── db.schema.auth.ts        # Auth-related schemas
+└── db.config.ts            # Database configuration
+```
+
+## Schema Definition Pattern
+Use Drizzle ORM's schema definition pattern:
+
+```typescript
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+
+export const exampleSchema = pgTable('table_name', {
+  // Always include these base fields
+  id: uuid().primaryKey().defaultRandom(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow(),
+  
+  // Add table-specific fields here
+})
+```
+
+## Field Types
+Preferred field types:
+- `uuid()` for IDs
+- `text()` for strings (prefer over varchar)
+- `timestamp()` for dates
+- `boolean()` for boolean values
+- `jsonb()` for JSON data
+- `integer()` for numbers
+- `decimal()` for monetary values
+
+## Relationships
+- Use references for foreign keys
+- Always reference by UUID
+- Include proper cascade rules
+
+Example:
+```typescript
+userId: uuid().notNull().references(() => user.id, { onDelete: 'cascade' })
+```
+
+## Naming Conventions
+- Table names: singular, lowercase, underscore_case
+- Column names: camelCase
+- Foreign keys: entityNameId (e.g., userId, resourceId)
+- Junction tables: entity1_entity2 (e.g., user_resource)
+
+## Schema Updates
+When updating schemas:
+1. Create migration using `pnpm db:generate`
+2. Review migration file
+3. Apply using `pnpm db:push`
+4. Update related type definitions

@@ -1,0 +1,69 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Authentication Conventions
+
+## Auth Implementation
+Authentication is implemented using:
+- [better-auth](https://github.com/better-auth/better-auth) for core auth functionality
+- Drizzle adapter for database storage
+- Google OAuth for social login
+
+## File Structure
+Auth-related files are organized as:
+
+```
+server/
+├── api/
+│   └── auth/
+│       └── [...auth].ts    # Auth route handlers
+└── utils/
+    ├── auth.ts            # Auth configuration
+    ├── auth-z.ts          # Auth middleware
+    └── db.schema.auth.ts  # Auth schemas
+```
+
+## Auth Middleware Usage
+Use the `authZ` middleware from [server/utils/auth-z.ts](mdc:server/utils/auth-z.ts):
+
+```typescript
+const userId = await authZ(event)
+if (!userId) {
+  throw createError({
+    status: 401,
+    message: 'Unauthorized',
+  })
+}
+```
+
+## Protected Routes
+All API routes should be protected by default unless explicitly marked as public:
+- Use `authZ` middleware
+- Handle authentication errors
+- Include proper error messages
+- Test auth requirements
+
+## Auth Schema
+Auth-related tables defined in [server/utils/db.schema.auth.ts](mdc:server/utils/db.schema.auth.ts):
+- `user`: User accounts
+- `session`: Active sessions
+- `account`: OAuth accounts
+- `verification`: Email verification
+
+## Environment Variables
+Required auth-related environment variables:
+```env
+AUTH_SECRET=your-auth-secret-key
+AUTH_ORIGIN=http://localhost:3000
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
+
+## Error Handling
+Standard auth error responses:
+- 401: Not authenticated
+- 403: Not authorized
+- 400: Invalid credentials
+- 404: User not found

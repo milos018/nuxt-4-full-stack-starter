@@ -1,0 +1,124 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Frontend Styling Conventions
+
+## CSS Organization
+Styles are organized using a combination of:
+- TailwindCSS for utility classes
+- CSS modules for component-specific styles
+- Global CSS for base styles
+
+## Directory Structure
+```
+app/
+├── assets/
+│   └── css/
+│       ├── main.css      # Global styles
+│       └── tailwind/     # Tailwind customizations
+└── components/
+    └── ComponentName/
+        ├── index.vue     # Component
+        └── styles.module.css  # Component styles
+```
+
+## TailwindCSS Usage
+Prefer Tailwind utilities in this order:
+1. Layout (flex, grid, position)
+2. Spacing (margin, padding)
+3. Sizing (width, height)
+4. Typography
+5. Colors
+6. Other utilities
+
+Example:
+```vue
+<template>
+  <div class="flex items-center p-4 w-full text-lg text-gray-800 bg-white">
+    <!-- Content -->
+  </div>
+</template>
+```
+
+## Component-Specific Styles
+When Tailwind isn't sufficient, use CSS modules:
+```vue
+<script setup lang="ts">
+import styles from './styles.module.css'
+</script>
+
+<template>
+  <div :class="styles.container">
+    <!-- Content -->
+  </div>
+</template>
+```
+
+```css
+/* styles.module.css */
+.container {
+  /* Complex styles here */
+}
+```
+
+## Theme Configuration
+Theme configuration in [app.config.ts](mdc:app/app.config.ts):
+```typescript
+export default defineAppConfig({
+  ui: {
+    primary: 'blue',
+    gray: 'cool',
+    colors: ['red', 'orange', 'green'],
+  }
+})
+```
+
+## Color Usage
+- Use semantic color names
+- Use CSS variables for themes
+- Follow accessibility guidelines
+- Use Tailwind's color palette
+
+## Responsive Design
+Follow mobile-first approach:
+```vue
+<template>
+  <div class="
+    w-full           /* Mobile (default) */
+    md:w-2/3        /* Tablet (768px) */
+    lg:w-1/2        /* Desktop (1024px) */
+  ">
+    <!-- Content -->
+  </div>
+</template>
+```
+
+## Dark Mode
+Support dark mode using Tailwind:
+```vue
+<template>
+  <div class="
+    bg-white dark:bg-gray-800
+    text-gray-900 dark:text-white
+  ">
+    <!-- Content -->
+  </div>
+</template>
+```
+
+## Animation Guidelines
+- Use CSS transitions for simple animations
+- Use Vue transitions for component animations
+- Keep animations subtle and purposeful
+- Consider reduced-motion preferences
+
+## Best Practices
+1. Keep styles close to components
+2. Avoid global styles when possible
+3. Use CSS variables for theming
+4. Follow consistent spacing scale
+5. Maintain responsive breakpoints
+6. Consider RTL support
+7. Follow accessibility guidelines

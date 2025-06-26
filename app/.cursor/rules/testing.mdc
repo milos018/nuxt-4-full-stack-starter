@@ -1,0 +1,81 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Testing Conventions
+
+## Test Organization
+Tests are organized in the following structure:
+
+```
+tests/
+├── api/                    # API route tests
+│   └── resource.test.ts   # Resource-specific tests
+├── e2e/                   # End-to-end tests
+│   └── index.spec.ts     # Playwright tests
+└── setup.ts              # Test configuration
+```
+
+## API Test Pattern
+Each API test suite should:
+
+1. Set up test data in `beforeAll`
+2. Clean up test data in `afterAll`
+3. Test all major scenarios
+4. Use descriptive test names
+
+Example structure:
+```typescript
+describe('Resource API', () => {
+  let testContext: any
+  let testUser: any
+
+  beforeAll(async () => {
+    // Set up test context and data
+  })
+
+  afterAll(async () => {
+    // Clean up test data
+  })
+
+  describe('POST /api/resource/create', () => {
+    it('should create new resource')
+    it('should validate required fields')
+    it('should require authentication')
+    it('should handle errors')
+  })
+})
+```
+
+## Test Data Management
+- Create test data in `beforeAll`
+- Clean up ALL test data in `afterAll`
+- Use unique identifiers for test data
+- Avoid dependencies between tests
+
+## Authentication in Tests
+- Create test users for different scenarios
+- Test both authenticated and unauthenticated states
+- Test different permission levels
+- Clean up auth tokens between tests
+
+## Database Testing
+- Use a separate test database
+- Clean up test data after each test suite
+- Test database constraints and relationships
+- Include transaction rollback tests
+
+## E2E Testing
+Use Playwright for end-to-end tests:
+- Test critical user flows
+- Test across different viewports
+- Include accessibility tests
+- Test error scenarios
+
+## Test Environment
+Configuration in [tests/setup.ts](mdc:tests/setup.ts):
+- Use test-specific environment variables
+- Configure test timeouts
+- Set up global test hooks
+- Configure test database

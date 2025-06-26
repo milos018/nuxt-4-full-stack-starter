@@ -1,0 +1,99 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# API Route Conventions
+
+## File Structure
+API routes in this Nuxt 3 project follow a specific file-based routing convention:
+
+```
+server/api/
+├── resource/                 # Resource-specific routes
+│   ├── create.post.ts       # POST /api/resource/create
+│   ├── [id].get.ts         # GET /api/resource/:id
+│   ├── [id].patch.ts       # PATCH /api/resource/:id
+│   └── [id].delete.ts      # DELETE /api/resource/:id
+└── auth/                    # Auth-related routes
+    └── [...auth].ts        # Catch-all auth routes
+```
+
+## Route Handler Pattern
+Each route handler should:
+
+1. Use Zod for request validation
+2. Handle authentication appropriately
+3. Include proper error handling
+4. Be properly typed with TypeScript
+
+Example structure:
+```typescript
+import { z } from 'zod'
+
+// 1. Define validation schema
+const requestSchema = z.object({
+  // ... schema definition
+})
+
+// 2. Create route handler
+export default eventHandler(async (event) => {
+  try {
+    // 3. Validate request
+    const body = await readValidatedBody(event, requestSchema.parse)
+    
+    // 4. Handle authentication
+    const userId = await authZ(event)
+    
+    // 5. Main logic
+    const result = await db.transaction(async (tx) => {
+      // ... business logic
+    })
+    
+    // 6. Return response
+    return result
+  }
+  catch (error) {
+    // 7. Error handling
+    if (error instanceof z.ZodError) {
+      throw createError({
+        status: 400,
+        message: 'Validation error',
+        data: error.errors,
+      })
+    }
+    
+    throw createError({
+      status: 500,
+      message: 'Internal server error',
+    })
+  }
+})
+```
+
+## Authentication
+- Use `authZ(event)` from [server/utils/auth-z.ts](mdc:server/utils/auth-z.ts) for authentication
+- Returns user ID if authenticated
+- Throws 401 if not authenticated
+
+## Database Operations
+- Use Drizzle ORM for database operations
+- Always use transactions for multi-step operations
+- Include proper error handling and rollbacks
+- Reference schemas from [server/utils/db.schema.ts](mdc:server/utils/db.schema.ts)
+
+## Error Handling
+Standard error responses:
+- 400: Validation errors (invalid input)
+- 401: Unauthorized (not authenticated)
+- 403: Forbidden (not authorized)
+- 404: Not found
+- 500: Internal server error
+
+## Testing
+Each API route should have corresponding tests that cover:
+- Success cases
+- Validation errors
+- Authentication requirements
+- Authorization rules
+- Edge cases
