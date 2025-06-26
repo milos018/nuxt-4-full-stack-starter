@@ -1,0 +1,44 @@
+{
+  "name": "budgett-app",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev -p 1111",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
+    "postinstall": "nuxt prepare",
+    "db:generate": "drizzle-kit generate --config=server/db/drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=server/db/drizzle.config.ts",
+    "db:push": "drizzle-kit push --config=server/db/drizzle.config.ts",
+    "db:pull": "drizzle-kit pull --config=server/db/drizzle.config.ts",
+    "db:seed": "tsx server/db/seed/index.ts",
+    "lint": "eslint",
+    "test": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@nuxt/ui-pro": "^3.2.0",
+    "@pinia/colada-nuxt": "^0.2.1",
+    "@pinia/nuxt": "^0.11.1",
+    "@vee-validate/nuxt": "^4.15.1",
+    "@vee-validate/zod": "^4.15.1",
+    "better-auth": "^1.2.10",
+    "countries-list": "^3.1.1",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.44.2",
+    "googleapis": "^150.0.1",
+    "nuxt": "4.0.0-alpha.2",
+    "pg": "^8.16.2",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.16.1",
+    "@nuxt/eslint": "^1.4.1",
+    "@nuxt/test-utils": "^3.19.1",
+    "@playwright/test": "^1.53.1",
+    "tailwindcss": "^4.1.11"
+  }
+}
