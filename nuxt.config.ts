@@ -34,10 +34,6 @@ export default defineNuxtConfig({
     preference: 'light',
   },
 
-  future: {
-    compatibilityVersion: 4,
-  },
-
   experimental: {
     typedPages: true,
   },
