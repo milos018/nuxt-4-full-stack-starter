@@ -5,6 +5,7 @@ definePageMeta({
   name: 'app-home',
 })
 
+const config = useRuntimeConfig()
 const { fetchSession } = useAuth()
 await fetchSession()
 
@@ -148,7 +149,7 @@ watch(() => route.path, () => {
       class="min-w-[280px]"
     >
       <template #header>
-        Budgett
+        {{ config.public.appName }}
       </template>
 
       <UTabs

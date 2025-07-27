@@ -1,55 +1,29 @@
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
+import { resourceSchema } from '~~/server/utils/db.schema'
+import { resourceSchema as resourceValidation } from '~~/shared/resource'
 
-const updateTransactionSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  type: z.string().optional(),
-  url: z.string().optional(),
-  tags: z.string().optional(),
-})
+// Partial schema for updates
+const updateResourceSchema = resourceValidation.partial()
 
-export default eventHandler(async (e) => {
+export default eventHandler(async (event) => {
   try {
-    const { id } = await getValidatedRouterParams(e, (params) => {
+    // Validate route params
+    const { id } = await getValidatedRouterParams(event, (params) => {
       return z.object({
         id: z.string().uuid(),
       }).parse(params)
     })
 
-    const userId = await authZ(e)
+    // Authenticate user
+    const userId = await authZ(event)
 
-    const {
-      name,
-      description,
-      type,
-      url,
-      tags,
-    } = await readValidatedBody(e, body => updateTransactionSchema.parse(body))
+    // Validate request body
+    const updates = await readValidatedBody(event, updateResourceSchema.parse)
 
-    if (id) {
-      const [resource] = await db
-        .select({
-          id: resourceSchema.id,
-          userId: resourceSchema.userId,
-        })
-        .from(resourceSchema)
-        .where(
-          and(
-            eq(resourceSchema.id, id),
-            eq(resourceSchema.userId, userId),
-          ),
-        )
-
-      if (!account) {
-        throw createError({ status: 404, message: 'Account not found or unauthorized' })
-      }
-    }
-
-    const [existingTransaction] = await db
-      .select({
-        id: resourceSchema.id,
-      })
+    // Check if resource exists and belongs to user
+    const [existingResource] = await db
+      .select()
       .from(resourceSchema)
       .where(
         and(
@@ -58,63 +32,38 @@ export default eventHandler(async (e) => {
         ),
       )
 
-    if (!existingTransaction) {
-      throw createError({ status: 404, message: 'Resource not found or unauthorized' })
-    }
-
-    await db
-      .transaction(async (trx) => {
-        let newEntity = id
-
-        if (!id && name) {
-          const [entity] = await trx
-            .insert(resourceSchema)
-            .values({
-              status: 'active',
-              nextBilledAt: new Date(),
-              cancelAt: null,
-              cancelAtPeriodEnd: false,
-              ...(name && { name }),
-              ...(description && { description }),
-              ...(url && { url }),
-              ...(type && { type }),
-              ...(tags && { tags }),
-              userId,
-            })
-            .returning()
-
-          newEntity = entity.id
-        }
-
-        await trx
-          .update(resourceSchema)
-          .set({
-            status: 'active',
-            nextBilledAt: new Date(),
-            cancelAt: null,
-            cancelAtPeriodEnd: false,
-            ...(name && { name }),
-            ...(description && { description }),
-            ...(url && { url }),
-            ...(type && { type }),
-            ...(tags && { tags }),
-          })
-          .where(
-            eq(resourceSchema.id, existingTransaction.id),
-          )
-          .returning()
-
-        return existingTransaction
+    if (!existingResource) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Resource not found',
       })
-
-    return {
-      success: true,
     }
+
+    // Update resource
+    const [updatedResource] = await db
+      .update(resourceSchema)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(resourceSchema.id, id))
+      .returning()
+
+    return updatedResource
   }
   catch (error) {
-    if (error instanceof Error) {
-      console.error(error)
-      throw createError({ status: 500, message: 'Internal server error' })
+    if (error instanceof z.ZodError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Validation error',
+        data: error.issues,
+      })
     }
+
+    console.error('Error updating resource:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to update resource',
+    })
   }
 })

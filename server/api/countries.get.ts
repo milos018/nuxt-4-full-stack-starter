@@ -1,28 +1,19 @@
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-
-// cache countries in memory
-async function queryCountriesList(_db: PostgresJsDatabase) {
-  return await db
-    .select()
-    .from(countrySchema)
-    .orderBy(countrySchema.label)
-}
-
-type Countries = Awaited<ReturnType<typeof queryCountriesList>>
-const cachedCountries: Countries = []
-
+// Example API route - replace with your domain-specific logic
 export default eventHandler(async () => {
   try {
-    if (cachedCountries.length)
-      return cachedCountries
-
-    cachedCountries.push(...await queryCountriesList(db))
-    return cachedCountries
+    // Example: return static data
+    // In a real app, you might fetch from a database or external API
+    return [
+      { id: '1', label: 'Example Organization 1' },
+      { id: '2', label: 'Example Organization 2' },
+      { id: '3', label: 'Example Organization 3' },
+    ]
   }
   catch (error) {
-    if (error instanceof Error) {
-      console.error(error)
-      throw createError(error)
-    }
+    console.error('Error fetching data:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to fetch data',
+    })
   }
 })

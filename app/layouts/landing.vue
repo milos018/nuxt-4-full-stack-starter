@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const config = useRuntimeConfig()
 const { user } = useAuth()
 </script>
 
@@ -6,7 +7,7 @@ const { user } = useAuth()
   <UPage>
     <UHeader>
       <template #title>
-        Budgett
+        {{ config.public.appName }}
       </template>
 
       <template #right>

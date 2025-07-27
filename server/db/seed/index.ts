@@ -2,14 +2,28 @@ import process from 'node:process'
 import { db } from '~~/server/utils/db.config'
 
 import {
-  countrySchema,
+  resourceSchema,
 } from '~~/server/utils/db.schema'
-import { seedCountries } from './seed.countries'
 
 const seeds = [
   {
-    table: countrySchema,
-    data: seedCountries(),
+    table: resourceSchema,
+    data: [
+      {
+        id: '1',
+        name: 'Example Resource 1',
+        description: 'This is an example resource for testing',
+        status: 'active',
+        userId: '1',
+      },
+      {
+        id: '2',
+        name: 'Example Resource 2',
+        description: 'Another example resource',
+        status: 'active',
+        userId: '2',
+      },
+    ],
   },
 ]
 
@@ -24,9 +38,7 @@ async function seedDb() {
 
         await db
           .insert(table)
-          .values({
-            ...item,
-          })
+          .values(item)
           .onConflictDoNothing()
           .returning()
       }

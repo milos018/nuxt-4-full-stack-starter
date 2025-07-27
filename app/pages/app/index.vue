@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { useCountries } from '~/queries/countries'
-
-const {
-  countries,
-} = useCountries()
+const config = useRuntimeConfig()
 </script>
 
 <template>
@@ -15,7 +11,7 @@ const {
         </template>
 
         <template #right>
-          <UButton label="Country" variant="subtle" icon="i-lucide-plus" @click="() => {}" />
+          <UButton label="New" variant="subtle" icon="i-lucide-plus" @click="() => {}" />
         </template>
       </UDashboardNavbar>
     </template>
@@ -29,10 +25,10 @@ const {
         <div class="text-center mb-6 sm:mb-8">
           <Icon name="i-lucide-rocket" class="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary mb-3 sm:mb-4" />
           <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-            Welcome to Budgett!
+            Welcome to {{ config.public.appName }}!
           </h2>
           <p class="text-sm sm:text-base text-gray-600">
-            Let's get you started with 2 simple steps
+            Let's get you started
           </p>
         </div>
 
@@ -46,10 +42,10 @@ const {
                 </div>
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-gray-900 text-sm sm:text-base">
-                    Create Personal Account
+                    Get Started
                   </h3>
                   <p class="text-xs sm:text-sm text-gray-600 mt-1">
-                    Set up your first account to track your finances
+                    Create your first resource
                   </p>
                 </div>
               </div>
@@ -57,14 +53,14 @@ const {
                 color="primary"
                 class="w-full sm:w-auto shrink-0"
                 size="sm"
-                to="/app/settings/account?open=true"
+                @click="() => {}"
               >
-                Create Account
+                Create Resource
               </UButton>
             </div>
           </UCard>
 
-          <!-- Step 2: Add Payment Method -->
+          <!-- Step 2: Next Steps -->
           <UCard>
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 p-3 sm:p-4">
               <div class="flex items-center gap-3 sm:gap-4">
@@ -73,10 +69,10 @@ const {
                 </div>
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-gray-500 text-sm sm:text-base">
-                    Add Payment Method
+                    Explore Features
                   </h3>
                   <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                    Add a payment method to track transactions
+                    Discover what you can build
                   </p>
                 </div>
               </div>
@@ -86,7 +82,7 @@ const {
                 class="w-full sm:w-auto shrink-0"
                 size="sm"
               >
-                Coming Next
+                Coming Soon
               </UButton>
             </div>
           </UCard>

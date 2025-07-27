@@ -1,74 +1,59 @@
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
+import { resourceSchema } from '~~/server/utils/db.schema'
 
-export default eventHandler(async (e) => {
+export default eventHandler(async (event) => {
   try {
-    const { transactionId } = await getValidatedRouterParams(e, (params) => {
+    // Validate route params
+    const { id } = await getValidatedRouterParams(event, (params) => {
       return z.object({
-        transactionId: z.string().uuid(),
+        id: z.string().uuid(),
       }).parse(params)
     })
 
-    const userId = await authZ(e)
+    // Authenticate user
+    const userId = await authZ(event)
 
-    const [personalAccount] = await db
-      .select({
-        personalAccountId: personalTransactionsSchema.personalAccountId,
-        userId: personalAccountsSchema.userId,
-      })
-      .from(personalTransactionsSchema)
-      .innerJoin(personalAccountsSchema, eq(
-        personalTransactionsSchema.personalAccountId,
-        personalAccountsSchema.id,
-      ))
+    // Check if resource exists and belongs to user
+    const [existingResource] = await db
+      .select()
+      .from(resourceSchema)
       .where(
         and(
-          eq(personalTransactionsSchema.id, transactionId),
-          eq(personalAccountsSchema.userId, userId),
+          eq(resourceSchema.id, id),
+          eq(resourceSchema.userId, userId),
         ),
       )
 
-    if (!personalAccount || personalAccount.userId !== userId) {
-      throw createError({ status: 404, message: 'Transaction not found' })
+    if (!existingResource) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Resource not found',
+      })
     }
 
+    // Delete resource
     await db
-      .transaction(async (trx) => {
-        const [existingTransaction] = await trx
-          .select({
-            type: personalTransactionsSchema.type,
-            amount: personalTransactionsSchema.amount,
-          })
-          .from(personalTransactionsSchema)
-          .where(
-            and(
-              eq(personalTransactionsSchema.id, transactionId),
-              eq(personalTransactionsSchema.personalAccountId, personalAccount.personalAccountId),
-            ),
-          )
+      .delete(resourceSchema)
+      .where(eq(resourceSchema.id, id))
 
-        await trx
-          .update(personalAccountsSchema)
-          .set({
-            balance: existingTransaction?.type === 'expense'
-              ? sql`${personalAccountsSchema.balance} + ${existingTransaction?.amount}`
-              : sql`${personalAccountsSchema.balance} - ${existingTransaction?.amount}`,
-          })
-          .where(
-            eq(personalAccountsSchema.id, personalAccount.personalAccountId),
-          )
-          .returning()
-
-        await trx.delete(personalTransactionsSchema)
-          .where(
-            eq(personalTransactionsSchema.id, transactionId),
-          )
-      })
+    return {
+      success: true,
+      message: 'Resource deleted successfully',
+    }
   }
   catch (error) {
-    if (error instanceof Error) {
-      console.error(error)
-      throw createError({ status: 500, message: 'Internal server error' })
+    if (error instanceof z.ZodError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Invalid resource ID',
+      })
     }
+
+    console.error('Error deleting resource:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to delete resource',
+    })
   }
 })

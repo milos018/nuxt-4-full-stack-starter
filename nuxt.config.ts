@@ -15,6 +15,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      appName: import.meta.env.NUXT_APP_NAME || 'My App',
+      appDescription: import.meta.env.NUXT_APP_DESCRIPTION || 'A modern web application',
       googleClientId: import.meta.env.NUXT_GOOGLE_CLIENT_ID,
       googleRedirectUri: import.meta.env.NUXT_GOOGLE_REDIRECT_URI,
       auth: {

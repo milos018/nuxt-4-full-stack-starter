@@ -1,106 +1,39 @@
-import { and, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
+import { resourceSchema } from '~~/server/utils/db.schema'
+import { resourceSchema as resourceValidation } from '~~/shared/resource'
 
-const createTransactionSchema = z.object({
-  name: z.string(),
-  type: z.enum(['income', 'expense']),
-  personalAccountId: z.string(),
-  paymentMethodId: z.string().optional(),
-  date: z.string(),
-  amount: z.number(),
-  entityId: z.string().optional(),
-  entityLabel: z.string().optional(),
-  categoryId: z.string().optional(),
-  subcategoryId: z.string().optional(),
-  isCleared: z.boolean().optional(),
-  isRecurring: z.boolean().optional(),
-  description: z.string().optional(),
-  documentUrl: z.string().optional(),
-})
-
-export default eventHandler(async (e) => {
+export default eventHandler(async (event) => {
   try {
-    const userId = await authZ(e)
+    // Authenticate user
+    const userId = await authZ(event)
 
-    const {
-      name,
-      type,
-      personalAccountId,
-      paymentMethodId,
-      date,
-      amount,
-      description,
-      url,
-      tags,
-    } = await readValidatedBody(e, body => createTransactionSchema.parse(body))
+    // Validate request body
+    const body = await readValidatedBody(event, resourceValidation.parse)
 
-    const [personalAccount] = await db
-      .select()
-      .from(resourceSchema)
-      .where(
-        and(
-          eq(resourceSchema.id, personalAccountId),
-          eq(resourceSchema.userId, userId),
-        ),
-      )
+    // Create resource in database
+    const [resource] = await db
+      .insert(resourceSchema)
+      .values({
+        ...body,
+        userId,
+      })
+      .returning()
 
-    const result = await db.transaction(async (tx) => {
-      let newEntity = id
-
-      if (!id && name) {
-        const [entity] = await tx
-          .insert(resourceSchema)
-          .values({
-            status: 'active',
-            nextBilledAt: new Date(),
-            cancelAt: null,
-            cancelAtPeriodEnd: false,
-            userId,
-          })
-          .returning()
-
-        newEntity = entity.id
-      }
-
-      const [transaction] = await tx
-        .insert(resourceSchema)
-        .values({
-          type,
-          personalAccountId: personalAccount.id,
-          paymentMethodId,
-          date,
-          amount: amount.toString(),
-          entityId: newEntity,
-          categoryId: categoryId || null,
-          subcategoryId: subcategoryId || null,
-          isCleared,
-          isRecurring,
-          description,
-          documentUrl,
-        })
-        .returning()
-
-      await tx
-        .update(personalAccountsSchema)
-        .set({
-          balance: type === 'expense'
-            ? sql`${personalAccountsSchema.balance} - ${amount}`
-            : sql`${personalAccountsSchema.balance} + ${amount}`,
-        })
-        .where(eq(personalAccountsSchema.id, personalAccount.id))
-
-      return transaction
-    })
-
-    return result
+    return resource
   }
   catch (error) {
-    if (error instanceof Error) {
-      console.error(error)
+    if (error instanceof z.ZodError) {
       throw createError({
-        statusCode: 500,
-        statusMessage: error.message,
+        statusCode: 400,
+        statusMessage: 'Validation error',
+        data: error.issues,
       })
     }
+
+    console.error('Error creating resource:', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to create resource',
+    })
   }
 })

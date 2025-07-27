@@ -1,10 +1,10 @@
-# Nuxt 3 Full Stack Starter Template
+# Nuxt 4 Full Stack Starter Template
 
 A production-ready template for building full-stack applications with Nuxt 3/4, featuring authentication, database integration, and modern tooling.
 
 ## Features
 
-- 🚀 **Latest Nuxt**: Compatible with Nuxt 3 and ready for Nuxt 4
+- 🚀 **Latest Nuxt**: Compatible with Nuxt 3 and beyond
 - 🔐 **Authentication**: Built-in auth system with Google OAuth support
 - 💾 **Database Integration**: PostgreSQL with Drizzle ORM
 - 🎨 **UI Components**: Nuxt UI Pro integration

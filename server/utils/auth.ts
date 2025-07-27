@@ -8,7 +8,7 @@ const nuxtConfig = useRuntimeConfig()
 dotenv.config()
 
 export const auth = betterAuth({
-  appName: 'Budgett',
+  appName: useRuntimeConfig().public.appName || 'My App',
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
