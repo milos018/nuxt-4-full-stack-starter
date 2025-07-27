@@ -4,7 +4,6 @@ import { useCountries } from '~/queries/countries'
 const {
   countries,
 } = useCountries()
-
 </script>
 
 <template>

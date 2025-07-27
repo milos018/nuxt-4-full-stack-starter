@@ -12,4 +12,3 @@ export const resourceSchema = pgTable('resource', {
   createdAt: timestamp().notNull().defaultNow(),
   updatedAt: timestamp().notNull().defaultNow(),
 })
-

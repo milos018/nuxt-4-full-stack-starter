@@ -1,14 +1,15 @@
 {
   "name": "nuxt-3-full-stack-starter",
-  "version": "1.0.0",
-  "description": "A production-ready template for building full-stack applications with Nuxt 3+",
   "type": "module",
+  "version": "1.0.0",
   "private": false,
   "packageManager": "pnpm@10.13.1",
+  "description": "A production-ready template for building full-stack applications with Nuxt 3+",
   "author": {
     "name": "Milos Dimitrijevic",
     "url": "https://github.com/milos018"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/milos018/nuxt-4-full-stack-starter.git"
@@ -25,7 +26,6 @@
     "postgresql",
     "drizzle"
   ],
-  "license": "MIT",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev --port 5011",

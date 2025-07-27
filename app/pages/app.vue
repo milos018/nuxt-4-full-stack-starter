@@ -125,7 +125,6 @@ watch(currentTab, (newTab) => {
   }
 })
 
-
 const { signOut, user } = useAuth()
 
 function handleLogout() {

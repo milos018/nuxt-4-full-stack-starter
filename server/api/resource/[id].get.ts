@@ -11,7 +11,6 @@ export default eventHandler(async (e) => {
 
     const userId = await authZ(e)
 
-
     if (id) {
       const [resource] = await db
         .select({

@@ -14,10 +14,10 @@ function DEFAULT_LOGIN() {
 }
 
 const {
-  defineField, 
+  defineField,
   handleSubmit,
-  resetForm, 
-  errors, 
+  resetForm,
+  errors,
   values: formValues,
 } = useForm({
   validationSchema: toTypedSchema(loginSchema),
